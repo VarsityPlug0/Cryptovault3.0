@@ -1,0 +1,128 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Referral Program - AI Crypto Vault{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">Referral Program</h1>
+            
+            <!-- Stats Section -->
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <h3 class="card-title">👥 Total Referred</h3>
+                            <p class="display-4">{{ total_referred }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <h3 class="card-title">✅ Valid Deposits</h3>
+                            <p class="display-4">{{ valid_deposits }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <h3 class="card-title">💰 Total Earned</h3>
+                            <p class="display-4">R{{ total_earned }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Referral Link Section -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h3 class="card-title">Your Referral Link</h3>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="referralLink" 
+                               value="{{ request.scheme }}://{{ request.get_host }}/register/?ref={{ referral_code }}" 
+                               readonly>
+                        <button class="btn btn-primary" onclick="copyReferralLink()">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Potential Earnings Calculator -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h3 class="card-title">Potential Earnings Calculator</h3>
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <label class="form-label">Invite <input id="n" type="number" min="1" value="1" class="form-control" /></label>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="h4">You could earn: R<span id="potential">10</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Referral Table -->
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="card-title">Your Referrals</h3>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Friend</th>
+                                    <th>Signed Up</th>
+                                    <th>Deposited</th>
+                                    <th>You Earned</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for reward in referral_rewards %}
+                                <tr>
+                                    <td>{{ reward.referred.username }}</td>
+                                    <td>✅</td>
+                                    <td>✅ R{{ reward.deposit_amount }}</td>
+                                    <td>R{{ reward.reward_amount }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center">No referrals yet</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function copyReferralLink() {
+    const linkInput = document.getElementById('referralLink');
+    linkInput.select();
+    document.execCommand('copy');
+    
+    // Show feedback
+    const button = event.target.closest('button');
+    const originalText = button.innerHTML;
+    button.innerHTML = '<i class="fas fa-check"></i> Copied!';
+    setTimeout(() => {
+        button.innerHTML = originalText;
+    }, 2000);
+}
+
+// Potential earnings calculator
+document.getElementById('n').addEventListener('input', function(e) {
+    document.getElementById('potential').innerText = e.target.value * 10;
+});
+</script>
+{% endblock %} 

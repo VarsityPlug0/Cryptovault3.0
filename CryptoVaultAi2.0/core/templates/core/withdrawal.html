@@ -1,0 +1,181 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<style>
+    /* Style for select elements */
+    .form-select {
+        color: #000 !important;
+        background-color: #fff !important;
+    }
+    
+    /* Style for select options */
+    .form-select option {
+        color: #000 !important;
+        background-color: #fff !important;
+    }
+    
+    /* Style for select when focused */
+    .form-select:focus {
+        color: #000 !important;
+        background-color: #fff !important;
+    }
+</style>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+            <!-- Withdrawal Form Card -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="card-title mb-0">Withdraw Funds</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <!-- Amount Field -->
+                        <div class="mb-3">
+                            <label for="amount" class="form-label">Amount (R)</label>
+                            <input type="number" class="form-control" id="amount" name="amount" min="50" step="0.01" required>
+                            <div class="form-text">Minimum withdrawal amount is R50</div>
+                        </div>
+
+                        <!-- Payment Method Field -->
+                        <div class="mb-3">
+                            <label for="payment_method" class="form-label">Payment Method</label>
+                            <select class="form-select" id="payment_method" name="payment_method" required>
+                                <option value="">Select payment method</option>
+                                <option value="bank">Bank Transfer</option>
+                                <option value="cash">Cash Withdrawal</option>
+                            </select>
+                        </div>
+
+                        <!-- Bank Details Fields (shown only when bank transfer is selected) -->
+                        <div id="bankDetailsFields" style="display: none;">
+                            <div class="mb-3">
+                                <label for="account_holder_name" class="form-label">Account Holder Name</label>
+                                <input type="text" class="form-control" id="account_holder_name" name="account_holder_name" 
+                                       placeholder="Enter account holder's full name">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="bank_name" class="form-label">Bank Name</label>
+                                <select class="form-select" id="bank_name" name="bank_name">
+                                    <option value="">Select your bank</option>
+                                    <option value="ABSA">ABSA Bank</option>
+                                    <option value="CAPITEC">Capitec Bank</option>
+                                    <option value="FNB">First National Bank</option>
+                                    <option value="INVESTEC">Investec Bank</option>
+                                    <option value="NEDBANK">Nedbank</option>
+                                    <option value="STANDARD">Standard Bank</option>
+                                    <option value="AFRICAN">African Bank</option>
+                                    <option value="BIDVEST">Bidvest Bank</option>
+                                    <option value="DISCOVERY">Discovery Bank</option>
+                                    <option value="GRINDROD">Grindrod Bank</option>
+                                    <option value="HSBC">HSBC Bank</option>
+                                    <option value="MERCANTILE">Mercantile Bank</option>
+                                    <option value="SAHL">South African Home Loans</option>
+                                    <option value="TYM">TymeBank</option>
+                                    <option value="UBS">UBS Bank</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="account_number" class="form-label">Account Number</label>
+                                <input type="text" class="form-control" id="account_number" name="account_number" 
+                                       placeholder="Enter your account number">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="branch_code" class="form-label">Branch Code</label>
+                                <input type="text" class="form-control" id="branch_code" name="branch_code" readonly>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="account_type" class="form-label">Account Type</label>
+                                <select class="form-select" id="account_type" name="account_type">
+                                    <option value="">Select account type</option>
+                                    <option value="savings">Savings Account</option>
+                                    <option value="cheque">Cheque Account</option>
+                                    <option value="transmission">Transmission Account</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-check-circle me-2"></i>Submit Withdrawal
+                            </button>
+                            <a href="{% url 'wallet' %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left me-2"></i>Back to Wallet
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Withdrawal Instructions -->
+            <div class="card shadow-sm mt-4">
+                <div class="card-header bg-white">
+                    <h5 class="card-title mb-0">Withdrawal Instructions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info mb-0">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <strong>Important:</strong>
+                        <ul class="mb-0 mt-2">
+                            <li>Minimum withdrawal amount is R50</li>
+                            <li>Withdrawals are processed within 24-48 hours</li>
+                            <li>For bank transfers, please ensure your bank details are correct</li>
+                            <li>For cash withdrawals, you'll be contacted to arrange collection</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    // Bank branch codes mapping
+    const bankBranchCodes = {
+        'ABSA': '632005',
+        'CAPITEC': '470010',
+        'FNB': '250655',
+        'INVESTEC': '580105',
+        'NEDBANK': '198765',
+        'STANDARD': '051001',
+        'AFRICAN': '430000',
+        'BIDVEST': '462005',
+        'DISCOVERY': '679000',
+        'GRINDROD': '584000',
+        'HSBC': '587000',
+        'MERCANTILE': '450905',
+        'SAHL': '632005',
+        'TYM': '678910',
+        'UBS': '580105'
+    };
+
+    // Show/hide bank details fields based on payment method selection
+    document.getElementById('payment_method').addEventListener('change', function() {
+        const bankDetailsFields = document.getElementById('bankDetailsFields');
+        bankDetailsFields.style.display = this.value === 'bank' ? 'block' : 'none';
+        
+        // Make bank detail fields required when bank transfer is selected
+        const bankFields = bankDetailsFields.querySelectorAll('input, select');
+        bankFields.forEach(field => {
+            field.required = this.value === 'bank';
+        });
+    });
+
+    // Update branch code when bank is selected
+    document.getElementById('bank_name').addEventListener('change', function() {
+        const branchCodeInput = document.getElementById('branch_code');
+        const selectedBank = this.value;
+        branchCodeInput.value = bankBranchCodes[selectedBank] || '';
+    });
+</script>
+{% endblock %}
+
+{% endblock %} 
