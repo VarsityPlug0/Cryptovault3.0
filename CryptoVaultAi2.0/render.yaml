@@ -3,7 +3,7 @@ services:
     name: cryptovault
     env: python
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn varsity_plug.wsgi:application
+    startCommand: gunicorn aicryptovault.wsgi:application
     envVars:
       - key: DATABASE_URL
         fromDatabase:
@@ -14,7 +14,7 @@ services:
       - key: WEB_CONCURRENCY
         value: 4
       - key: PYTHON_VERSION
-        value: 3.11.0
+        value: 3.13.0
     preDeployCommand: |
       python manage.py migrate
       python manage.py collectstatic --noinput
