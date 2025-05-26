@@ -126,7 +126,8 @@ def login_view(request):
 @login_required
 def dashboard_view(request):
     user = request.user
-    wallet = Wallet.objects.get(user=user)
+    # Get or create wallet for the user
+    wallet, created = Wallet.objects.get_or_create(user=user)
     investments = Investment.objects.filter(user=user)
     deposits = Deposit.objects.filter(user=user).order_by('-created_at')
     referrals = Referral.objects.filter(inviter=user)
@@ -206,8 +207,8 @@ def tiers_view(request):
     # Calculate total invested from actual investments
     total_invested = sum(inv.amount for inv in Investment.objects.filter(user=user))
     
-    # Get user's wallet
-    wallet = Wallet.objects.get(user=user)
+    # Get or create user's wallet
+    wallet, created = Wallet.objects.get_or_create(user=user)
     
     # Add eligibility and lock status to each tier
     for tier in tiers:
@@ -291,7 +292,8 @@ def invest_view(request, tier_id):
 @login_required
 def wallet_view(request):
     user = request.user
-    wallet = Wallet.objects.get(user=user)
+    # Get or create wallet for the user
+    wallet, created = Wallet.objects.get_or_create(user=user)
     deposits = Deposit.objects.filter(user=user).order_by('-created_at')
     withdrawals = Withdrawal.objects.filter(user=user).order_by('-created_at')
     
