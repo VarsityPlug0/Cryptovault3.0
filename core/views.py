@@ -426,168 +426,79 @@ def withdrawal_view(request):
 # Shows real-time activity and AI investment updates
 @login_required
 def feed_view(request):
-    # --- 1. DUMMY DATA SETUP ---
-    dummy_names = [
-        'BitcoinPro', 'DigitalTrader', 'CryptoNinja', 'BlockchainKing',
-        'EthereumMaster', 'TradingGuru', 'TradingTitan', 'CryptoQueen',
-        'BitcoinWizard', 'BlockchainBoss', 'SmartInvestor', 'CryptoElite'
-    ]
-    dummy_tiers = [
-        {'name': 'Silver Elite', 'duration': 14},
-        {'name': 'Gold Premium', 'duration': 21},
-        {'name': 'Diamond VIP', 'duration': 45}
-    ]
-    dummy_investment_updates = [
+    # --- 1. AI INVESTMENT UPDATES ---
+    investment_updates = [
         {
-            'tier_name': 'Diamond VIP',
-            'username': 'CryptoQueen',
-            'return_amount': 5667.53,
-            'amount': 4733,
-            'duration': 45,
-            'timestamp': timezone.now() - timedelta(minutes=14)
+            'message': 'AI Trading Bot completed 5 successful trades',
+            'timestamp': timezone.now() - timedelta(hours=1)
         },
         {
-            'tier_name': 'Diamond VIP',
-            'username': 'CryptoNinja',
-            'return_amount': 2982.07,
-            'amount': 2270,
-            'duration': 45,
-            'timestamp': timezone.now() - timedelta(minutes=27)
+            'message': 'Market analysis shows positive trends for BTC',
+            'timestamp': timezone.now() - timedelta(hours=2)
         },
         {
-            'tier_name': 'Silver Elite',
-            'username': 'BitcoinWizard',
-            'return_amount': 10352.35,
-            'amount': 9183,
-            'duration': 14,
-            'timestamp': timezone.now() - timedelta(minutes=29)
-        },
-        {
-            'tier_name': 'Diamond VIP',
-            'username': 'BitcoinPro',
-            'return_amount': 9164.33,
-            'amount': 6808,
-            'duration': 45,
-            'timestamp': timezone.now() - timedelta(minutes=44)
-        },
-        {
-            'tier_name': 'Gold Premium',
-            'username': 'DigitalTrader',
-            'return_amount': 7602.12,
-            'amount': 5964,
-            'duration': 21,
-            'timestamp': timezone.now() - timedelta(minutes=60)
+            'message': 'New trading strategy implemented successfully',
+            'timestamp': timezone.now() - timedelta(hours=3)
         }
     ]
-    # --- 2. FETCH REAL DATA ---
-    latest_payouts = Investment.objects.filter(
-        is_active=False,
-        end_date__gte=timezone.now() - timedelta(days=1)
-    ).select_related('tier', 'user').order_by('-end_date')[:5]
-    recent_deposits = Deposit.objects.filter(
-        status='approved',
-        created_at__gte=timezone.now() - timedelta(days=1)
-    ).select_related('user').order_by('-created_at')[:10]
-    recent_referrals = ReferralReward.objects.filter(
-        awarded_at__gte=timezone.now() - timedelta(days=1)
-    ).select_related('referrer', 'referred').order_by('-awarded_at')[:5]
-    # --- 3. BUILD USER MILESTONES (REAL + DUMMY) ---
-    user_milestones = []
-    # Add real deposits
-    for deposit in recent_deposits:
-        user_milestones.append({
+
+    # --- 2. USER MILESTONES ---
+    user_milestones = [
+        {
             'type': 'deposit',
-            'user': {'username': deposit.user.username},
-            'amount': deposit.amount,
-            'timestamp': deposit.created_at
-        })
-    # Add simulated deposits if less than 10
-    while len(user_milestones) < 10:
-        user_milestones.append({
+            'user': 'User123',
+            'amount': 2000.00,
+            'timestamp': timezone.now() - timedelta(days=1, hours=2)
+        },
+        {
             'type': 'deposit',
-            'user': {'username': random.choice(dummy_names)},
-            'amount': random.randint(1000, 5000),
-            'timestamp': timezone.now() - timedelta(minutes=random.randint(1, 60))
-        })
-    # Add real upgrades
-    level_upgrades = CustomUser.objects.filter(
-        level__gt=1,
-        date_joined__gte=timezone.now() - timedelta(days=1)
-    ).order_by('-date_joined')[:3]
-    for user in level_upgrades:
-        user_milestones.append({
+            'user': 'Trader456',
+            'amount': 7000.00,
+            'timestamp': timezone.now() - timedelta(days=1, hours=3)
+        },
+        {
+            'type': 'deposit',
+            'user': 'Investor789',
+            'amount': 250.00,
+            'timestamp': timezone.now() - timedelta(days=1, hours=4)
+        },
+        {
+            'type': 'deposit',
+            'user': 'CryptoKing',
+            'amount': 500.00,
+            'timestamp': timezone.now() - timedelta(days=1, hours=5)
+        },
+        {
             'type': 'upgrade',
-            'user': {'username': user.username},
-            'level': user.level,
-            'timestamp': user.date_joined
-        })
-    # Add simulated upgrades if less than 13
-    while len(user_milestones) < 13:
-        user_milestones.append({
-            'type': 'upgrade',
-            'user': {'username': random.choice(dummy_names)},
-            'level': random.randint(2, 3),
-            'timestamp': timezone.now() - timedelta(minutes=random.randint(1, 60))
-        })
-    # Add real payouts
-    for payout in latest_payouts:
-        user_milestones.append({
-            'type': 'payout',
-            'user': {'username': payout.user.username},
-            'amount': payout.return_amount - payout.amount,
-            'timestamp': payout.end_date
-        })
-    # Add simulated payouts if less than 15
-    while len(user_milestones) < 15:
-        user_milestones.append({
-            'type': 'payout',
-            'user': {'username': random.choice(dummy_names)},
-            'amount': random.randint(1000, 5000),
-            'timestamp': timezone.now() - timedelta(minutes=random.randint(1, 60))
-        })
-    # Sort and limit
-    user_milestones.sort(key=lambda x: x['timestamp'], reverse=True)
-    user_milestones = user_milestones[:15]
-    # --- 4. BUILD INVESTMENT UPDATES (REAL + DUMMY) ---
-    investment_updates = []
-    # Add real payouts as investment updates
-    for payout in latest_payouts:
-        investment_updates.append({
-            'tier_name': payout.tier.name if payout.tier else 'Unknown',
-            'username': payout.user.username,
-            'return_amount': payout.return_amount,
-            'amount': payout.amount,
-            'duration': payout.tier.duration_days if payout.tier else 0,
-            'timestamp': payout.end_date
-        })
-    # Add dummy investment updates if less than 5
-    i = 0
-    while len(investment_updates) < 5 and i < len(dummy_investment_updates):
-        investment_updates.append(dummy_investment_updates[i])
-        i += 1
-    # Sort and limit
-    investment_updates.sort(key=lambda x: x['timestamp'], reverse=True)
-    investment_updates = investment_updates[:5]
-    # --- 5. BUILD REFERRAL ACTIVITIES (REAL + DUMMY) ---
-    referral_activities = []
-    for reward in recent_referrals:
-        referral_activities.append({
-            'referrer': reward.referrer.username,
-            'referred': reward.referred.username,
-            'amount': reward.reward_amount,
-            'timestamp': reward.awarded_at
-        })
-    # Add dummy referral activities if less than 5
-    while len(referral_activities) < 5:
-        referral_activities.append({
-            'referrer': random.choice(dummy_names),
-            'referred': random.choice(dummy_names),
-            'amount': random.randint(35, 88),
-            'timestamp': timezone.now() - timedelta(minutes=random.randint(1, 60))
-        })
-    referral_activities.sort(key=lambda x: x['timestamp'], reverse=True)
-    referral_activities = referral_activities[:5]
-    # --- 6. TIPS & SECURITY REMINDERS ---
+            'user': 'ProTrader',
+            'level': 2,
+            'timestamp': timezone.now() - timedelta(days=3, hours=1)
+        }
+    ]
+
+    # --- 3. REFERRAL ACTIVITY ---
+    referral_activities = [
+        {
+            'referrer': 'MasterTrader',
+            'referred': 'NewUser123',
+            'amount': 10.00,
+            'timestamp': timezone.now() - timedelta(days=1, hours=5)
+        },
+        {
+            'referrer': 'CryptoPro',
+            'referred': 'Investor456',
+            'amount': 15.00,
+            'timestamp': timezone.now() - timedelta(days=2, hours=3)
+        },
+        {
+            'referrer': 'BitcoinKing',
+            'referred': 'Trader789',
+            'amount': 20.00,
+            'timestamp': timezone.now() - timedelta(days=3, hours=1)
+        }
+    ]
+
+    # --- 4. TIPS & SECURITY REMINDERS ---
     tips = [
         "💡 Tip: Reinvest to reach higher tiers faster.",
         "💡 Tip: Refer friends to earn passive income.",
@@ -595,6 +506,7 @@ def feed_view(request):
         "💡 Tip: Stay consistent with your investments.",
         "💡 Tip: Monitor market trends for better timing."
     ]
+    
     security_reminders = [
         "⚠️ We never ask for your private keys. Stay safe.",
         "⚠️ Enable 2FA for extra security.",
@@ -602,7 +514,8 @@ def feed_view(request):
         "⚠️ Verify all transactions carefully.",
         "⚠️ Report suspicious activity immediately."
     ]
-    # --- 7. CONTEXT ---
+    
+    # --- 5. CONTEXT ---
     context = {
         'investment_updates': investment_updates,
         'user_milestones': user_milestones,
@@ -610,6 +523,7 @@ def feed_view(request):
         'tips': tips,
         'security_reminders': security_reminders,
     }
+    
     return render(request, 'core/feed.html', context)
 
 @login_required
