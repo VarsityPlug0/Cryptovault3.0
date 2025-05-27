@@ -436,21 +436,20 @@ def feed_view(request):
     recent_deposits = Deposit.objects.filter(
         status='approved',
         created_at__gte=timezone.now() - timedelta(days=1)
-    ).select_related('user').order_by('-created_at')[:3]
+    ).select_related('user').order_by('-created_at')[:10]
     
     # Get recent referral rewards from the last 24 hours
     recent_referrals = ReferralReward.objects.filter(
         awarded_at__gte=timezone.now() - timedelta(days=1)
     ).select_related(
         'referrer', 'referred'
-    ).order_by('-awarded_at')[:3]
+    ).order_by('-awarded_at')[:5]
     
     # Dummy usernames for simulated activity
     dummy_names = [
-        'CryptoWhale', 'BitcoinPro', 'EthereumMaster', 'TradingGuru', 
-        'BlockchainKing', 'CryptoQueen', 'DigitalTrader', 'SmartInvestor',
-        'CryptoNinja', 'BitcoinWizard', 'CryptoElite', 'BitcoinBaron',
-        'EthereumEmpire', 'TradingTitan', 'BlockchainBoss'
+        'BitcoinPro', 'DigitalTrader', 'CryptoNinja', 'BlockchainKing',
+        'EthereumMaster', 'TradingGuru', 'TradingTitan', 'CryptoQueen',
+        'BitcoinWizard', 'BlockchainBoss', 'SmartInvestor', 'CryptoElite'
     ]
     
     # Dummy tier names and durations
@@ -504,9 +503,6 @@ def feed_view(request):
         }
     ]
     
-    # Sort investment updates by timestamp
-    investment_updates.sort(key=lambda x: x['timestamp'], reverse=True)
-    
     # Get user milestones (deposits, upgrades, payouts)
     user_milestones = []
     
@@ -519,12 +515,12 @@ def feed_view(request):
             'timestamp': deposit.created_at
         })
     
-    # Add simulated deposits if we have less than 5 total activities
-    while len(user_milestones) < 5:
+    # Add simulated deposits if we have less than 10 total activities
+    while len(user_milestones) < 10:
         user_milestones.append({
             'type': 'deposit',
             'user': {'username': random.choice(dummy_names)},
-            'amount': random.randint(500, 5000),
+            'amount': random.randint(1000, 5000),
             'timestamp': timezone.now() - timedelta(minutes=random.randint(1, 60))
         })
     
@@ -543,8 +539,8 @@ def feed_view(request):
             'timestamp': user.date_joined
         })
     
-    # Add simulated upgrades if we have less than 8 total activities
-    while len(user_milestones) < 8:
+    # Add simulated upgrades if we have less than 13 total activities
+    while len(user_milestones) < 13:
         user_milestones.append({
             'type': 'upgrade',
             'user': {'username': random.choice(dummy_names)},
@@ -561,8 +557,8 @@ def feed_view(request):
             'timestamp': payout.end_date
         })
     
-    # Add simulated payouts if we have less than 10 total activities
-    while len(user_milestones) < 10:
+    # Add simulated payouts if we have less than 15 total activities
+    while len(user_milestones) < 15:
         user_milestones.append({
             'type': 'payout',
             'user': {'username': random.choice(dummy_names)},
@@ -572,7 +568,7 @@ def feed_view(request):
     
     # Sort milestones by timestamp
     user_milestones.sort(key=lambda x: x['timestamp'], reverse=True)
-    user_milestones = user_milestones[:10]  # Keep the 10 most recent activities
+    user_milestones = user_milestones[:15]  # Keep the 15 most recent activities
     
     # Process referral activities with dummy usernames
     referral_activities = []
@@ -591,7 +587,7 @@ def feed_view(request):
         referral_activities.append({
             'referrer': random.choice(dummy_names),
             'referred': random.choice(dummy_names),
-            'amount': random.randint(10, 100),
+            'amount': random.randint(35, 88),
             'timestamp': timezone.now() - timedelta(minutes=random.randint(1, 60))
         })
     
@@ -608,15 +604,6 @@ def feed_view(request):
         "💡 Tip: Monitor market trends for better timing."
     ]
     
-    # Add dynamic tip based on recent activity
-    if recent_deposits.exists():
-        latest_deposit = recent_deposits.first()
-        if latest_deposit.amount >= 1000:
-            tips.append(f"💡 Tip: Large deposits like R{latest_deposit.amount} can be split across multiple tiers for better returns!")
-    
-    if level_upgrades.exists():
-        tips.append("💡 Tip: Level up faster by maintaining consistent investment patterns!")
-    
     # Security reminders
     security_reminders = [
         "⚠️ We never ask for your private keys. Stay safe.",
@@ -627,10 +614,10 @@ def feed_view(request):
     ]
     
     context = {
-        'investment_updates': investment_updates,  # Use the new investment updates list
+        'investment_updates': investment_updates,
         'user_milestones': user_milestones,
         'referral_activities': referral_activities,
-        'tips': tips[:5],  # Keep only the 5 most relevant tips
+        'tips': tips,
         'security_reminders': security_reminders,
     }
     

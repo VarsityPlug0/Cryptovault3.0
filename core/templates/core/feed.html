@@ -1,7 +1,7 @@
 {% extends 'core/base.html' %}
 {% load static %}
 
-{% block title %}Crypto Feed - AI Crypto Vault{% endblock %}
+{% block title %}Feed - AI Crypto Vault{% endblock %}
 
 {% block content %}
 <div class="container py-5">
@@ -36,7 +36,7 @@
                         </div>
                         <div class="col-md-3">
                             <div class="text-center p-3 border border-secondary rounded">
-                                <h3 class="text-success mb-0" id="today-payouts">R0</h3>
+                                <h3 class="text-success mb-0" id="today-payouts">R120,000.00</h3>
                                 <small class="text-light">Today's Payouts</small>
                             </div>
                         </div>
@@ -110,10 +110,6 @@
                                 <small class="text-light">{{ milestone.timestamp|timesince }} ago</small>
                             </div>
                         </div>
-                        {% empty %}
-                        <div class="text-center py-4">
-                            <p class="text-light mb-0">No recent activity</p>
-                        </div>
                         {% endfor %}
                     </div>
                 </div>
@@ -137,10 +133,6 @@
                                 </div>
                                 <small class="text-light">{{ update.timestamp|timesince }} ago</small>
                             </div>
-                        </div>
-                        {% empty %}
-                        <div class="text-center py-4">
-                            <p class="text-light mb-0">No recent payouts</p>
                         </div>
                         {% endfor %}
                     </div>
@@ -255,10 +247,6 @@
                                 <small class="text-light">{{ activity.timestamp|timesince }} ago</small>
                             </div>
                         </div>
-                        {% empty %}
-                        <div class="text-center py-4">
-                            <p class="text-light mb-0">No recent referrals</p>
-                        </div>
                         {% endfor %}
                     </div>
                 </div>
@@ -340,27 +328,27 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Sample data for demonstration
     const investmentUpdates = [
-        "New investment opportunity in Platinum Plus tier!",
-        "Market analysis shows strong potential for growth",
-        "AI trading bot achieved 98.7% success rate today",
-        "Special bonus available for early investors",
-        "New investment strategy implemented successfully"
+        "🧠 AI detected new market opportunity in Platinum tier",
+        "🧠 AI trading bot achieved 99.2% success rate",
+        "🧠 New AI strategy implemented for Gold tier",
+        "🧠 AI analysis shows bullish market trend",
+        "🧠 AI portfolio optimization completed"
     ];
 
     const userMilestones = [
-        "Reached Level 2 investor status!",
-        "Completed 5 successful investments",
-        "Achieved R10,000 total investment milestone",
-        "Earned R1,000 in referral bonuses",
-        "Maintained 30-day active streak"
+        "🌟 John reached Diamond tier status",
+        "🌟 Sarah completed 10 successful investments",
+        "🌟 Mike achieved R50,000 total investment",
+        "🌟 Emma earned R5,000 in referral bonuses",
+        "🌟 David maintained 60-day active streak"
     ];
 
     const referralActivity = [
-        "John joined through your referral link",
-        "Sarah completed her first investment",
-        "Mike reached Level 2 through your referral",
-        "Emma earned her first referral bonus",
-        "David's portfolio grew by 25%"
+        "🎉 Alice joined through your referral",
+        "🎉 Bob completed first investment",
+        "🎉 Carol reached Gold tier",
+        "🎉 Dave earned referral bonus",
+        "🎉 Eve's portfolio grew by 35%"
     ];
 
     // Function to create a new activity item with animation
