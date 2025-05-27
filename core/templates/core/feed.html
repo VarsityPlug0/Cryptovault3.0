@@ -13,6 +13,29 @@
                 </div>
                 <div class="card-body">
                     <div class="activity-feed">
+                        <!-- Daily Stats Section -->
+                        <div class="card mb-4 daily-stats-card">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>Daily Stats</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <h6>Total Earnings Today</h6>
+                                        <p class="text-success">R{{ daily_stats.total_earnings_today }}</p>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <h6>Active Investments</h6>
+                                        <p>{{ daily_stats.active_investments }}</p>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <h6>Referral Earnings Today</h6>
+                                        <p class="text-success">R{{ daily_stats.referral_earnings_today }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- AI Investment Updates -->
                         <div class="activity-section mb-4">
                             <h6 class="text-primary mb-3">
@@ -141,6 +164,29 @@
     setTimeout(function() {
         window.location.reload();
     }, 300000);
+
+    // Function to update daily stats dynamically
+    function updateDailyStats() {
+        const totalEarningsElement = document.querySelector('.daily-stats-card .text-success:nth-child(1)');
+        const activeInvestmentsElement = document.querySelector('.daily-stats-card p:nth-child(2)');
+        const referralEarningsElement = document.querySelector('.daily-stats-card .text-success:nth-child(3)');
+
+        let totalEarnings = parseFloat(totalEarningsElement.textContent.replace('R', ''));
+        let activeInvestments = parseInt(activeInvestmentsElement.textContent);
+        let referralEarnings = parseFloat(referralEarningsElement.textContent.replace('R', ''));
+
+        // Increase values every hour
+        totalEarnings += 10000;
+        activeInvestments += 1;
+        referralEarnings += 5000;
+
+        totalEarningsElement.textContent = 'R' + totalEarnings.toFixed(2);
+        activeInvestmentsElement.textContent = activeInvestments;
+        referralEarningsElement.textContent = 'R' + referralEarnings.toFixed(2);
+    }
+
+    // Update stats every hour
+    setInterval(updateDailyStats, 3600000);
 </script>
 
 <style>
@@ -215,6 +261,15 @@
 
 .activity-feed::-webkit-scrollbar-thumb:hover {
     background: rgba(255,255,255,0.3);
+}
+
+.daily-stats-card {
+    border: none;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+.daily-stats-card:hover {
+    transform: translateY(-5px);
 }
 </style>
 {% endblock %} 

@@ -50,7 +50,11 @@
                                         </h5>
                                         <p class="card-text">
                                             Investment: R{{ tier.amount }}<br>
-                                            Duration: {{ tier.duration_days }} days<br>
+                                            {% if tier.amount == 50 %}
+                                                Duration: 12 hours<br>
+                                            {% else %}
+                                                Duration: {{ tier.duration_days }} days<br>
+                                            {% endif %}
                                             {% if tier.is_daily_special %}
                                                 <span class="text-danger">
                                                     Special Return: R{{ tier.special_return_amount }}<br>

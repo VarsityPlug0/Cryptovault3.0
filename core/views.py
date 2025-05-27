@@ -515,6 +515,13 @@ def feed_view(request):
         "⚠️ Report suspicious activity immediately."
     ]
     
+    # Add a new section for daily stats
+    daily_stats = {
+        'total_earnings_today': 1000000.00,
+        'active_investments': 50,
+        'referral_earnings_today': 100000.00
+    }
+
     # --- 5. CONTEXT ---
     context = {
         'investment_updates': investment_updates,
@@ -522,6 +529,7 @@ def feed_view(request):
         'referral_activities': referral_activities,
         'tips': tips,
         'security_reminders': security_reminders,
+        'daily_stats': daily_stats
     }
     
     return render(request, 'core/feed.html', context)

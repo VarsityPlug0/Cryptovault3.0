@@ -13,9 +13,9 @@ tiers = [
         'name': 'Starter',
         'amount': 50,
         'return_amount': 100,
-        'duration_days': 1,
+        'duration_days': 0.5,
         'min_level': 1,
-        'description': 'Perfect for first-time investors. Quick 1-day return with 100% profit.'
+        'description': 'Perfect for first-time investors. Quick 12-hour return with 100% profit.'
     },
     {
         'name': 'Basic',

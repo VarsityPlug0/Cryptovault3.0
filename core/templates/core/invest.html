@@ -8,7 +8,11 @@
             <h5 class="card-title">Tier Details</h5>
             <p class="card-text">Amount: R{{ tier.amount }}</p>
             <p class="card-text">Return: R{{ tier.return_amount }}</p>
-            <p class="card-text">Duration: {{ tier.duration_days }} days</p>
+            {% if tier.amount == 50 %}
+                <p class="card-text">Duration: 12 hours</p>
+            {% else %}
+                <p class="card-text">Duration: {{ tier.duration_days }} days</p>
+            {% endif %}
             <form method="post">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-primary">Confirm Investment</button>

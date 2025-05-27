@@ -66,7 +66,11 @@
                         <span class="badge bg-secondary">Level {{ tier.min_level }}</span>
                     {% endif %}
                     <div class="mt-3">
-                        <p>Duration: {{ tier.duration_days }} days</p>
+                        {% if tier.amount == 50 %}
+                            <p>Duration: 12 hours</p>
+                        {% else %}
+                            <p>Duration: {{ tier.duration_days }} days</p>
+                        {% endif %}
                         <p>Return: R{{ tier.return_amount }}</p>
                     </div>
                     {% if user.is_authenticated %}
