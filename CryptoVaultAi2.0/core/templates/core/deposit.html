@@ -1,0 +1,115 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<style>
+    .form-select {
+        color: #000 !important;
+        background-color: #fff !important;
+    }
+    .form-select option {
+        color: #000 !important;
+        background-color: #fff !important;
+    }
+    .form-select:focus {
+        color: #000 !important;
+        background-color: #fff !important;
+    }
+</style>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <h2 class="card-title text-center mb-4">Make a Deposit</h2>
+                    
+                    <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        <div class="mb-4">
+                            <label for="amount" class="form-label">Amount (R)</label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-currency-rand"></i>
+                                </span>
+                                <input type="number" class="form-control" id="amount" name="amount" 
+                                       required min="50" placeholder="Enter amount (min R50)">
+                            </div>
+                            <div class="form-text">Minimum deposit amount is R50</div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="payment_method" class="form-label">Payment Method</label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-credit-card"></i>
+                                </span>
+                                <select class="form-select" id="payment_method" name="payment_method" required>
+                                    <option value="">Select payment method</option>
+                                    <option value="eft">Electronic Funds Transfer (EFT)</option>
+                                    <option value="cash">Cash Deposit at Bank Branch</option>
+                                </select>
+                            </div>
+                            <div class="form-text">
+                                <strong>EFT:</strong> Transfer funds directly from your bank account<br>
+                                <strong>Cash Deposit:</strong> Visit any Standard Bank branch to deposit cash
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="proof_image" class="form-label">Proof of Payment</label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-image"></i>
+                                </span>
+                                <input type="file" class="form-control" id="proof_image" name="proof_image" 
+                                       accept="image/*">
+                            </div>
+                            <div class="form-text">
+                                Upload a screenshot or photo of your payment confirmation (optional)
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-check-circle me-2"></i>Submit Deposit
+                            </button>
+                            <a href="{% url 'wallet' %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left me-2"></i>Back to Wallet
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Payment Instructions -->
+            <div class="card shadow-sm mt-4">
+                <div class="card-header bg-white">
+                    <h5 class="card-title mb-0">Payment Instructions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning mb-3">
+                        <i class="bi bi-clock-fill me-2"></i>
+                        <strong>Important EFT Instructions:</strong>
+                        <ul class="mb-0 mt-2">
+                            <li>Always select "Immediate Payment" or "Same Day Payment" option when making the EFT</li>
+                            <li>Regular EFTs can take 2-3 business days to process</li>
+                            <li>Your deposit will only be processed after we receive the funds</li>
+                        </ul>
+                    </div>
+                    <div class="mb-3">
+                        <h6 class="fw-bold">Bank Details:</h6>
+                        <p class="mb-1">Bank: Standard Bank</p>
+                        <p class="mb-1">Account Name: AI Crypto Vault</p>
+                        <p class="mb-1">Account Number: 1234567890</p>
+                        <p class="mb-1">Branch Code: 051001</p>
+                    </div>
+                    <div class="alert alert-info mb-0">
+                        <i class="bi bi-info-circle me-2"></i>
+                        Please use your email address as the reference when making the payment.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

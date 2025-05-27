@@ -1,0 +1,178 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Welcome Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h2 class="card-title h4 mb-0">Welcome, {{ user.username }}!</h2>
+                    <p class="text-muted mb-0">Your investment dashboard</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <!-- Total Invested -->
+        <div class="col-12 col-md-6 col-lg-3 mb-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted">Total Expected Return</h6>
+                    <h3 class="card-title mb-0">R{{ total_expected_return }}</h3>
+                    <small class="text-muted">Max waiting time: {{ max_waiting_time }} days</small>
+                </div>
+            </div>
+        </div>
+        <!-- Active Investments -->
+        <div class="col-12 col-md-6 col-lg-3 mb-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted">Active Investments</h6>
+                    <h3 class="card-title mb-0">{{ active_investments.count }}</h3>
+                </div>
+            </div>
+        </div>
+        <!-- Wallet Balance -->
+        <div class="col-12 col-md-6 col-lg-3 mb-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted">Wallet Balance</h6>
+                    <h3 class="card-title mb-0">R{{ user.wallet.balance }}</h3>
+                </div>
+            </div>
+        </div>
+        <!-- User Level -->
+        <div class="col-12 col-md-6 col-lg-3 mb-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted">Current Level</h6>
+                    <h3 class="card-title mb-0">Level {{ user.level }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Investments Table -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="card-title mb-0">Active Investments</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Tier</th>
+                                    <th>Amount</th>
+                                    <th>Expected Return</th>
+                                    <th>Start Date</th>
+                                    <th>End Date</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for investment in active_investments %}
+                                <tr>
+                                    <td>{{ investment.tier.name }}</td>
+                                    <td>R{{ investment.amount }}</td>
+                                    <td>R{{ investment.return_amount }}</td>
+                                    <td>{{ investment.start_date|date:"M d, Y" }}</td>
+                                    <td>{{ investment.end_date|date:"M d, Y" }}</td>
+                                    <td>
+                                        <span class="badge badge-success" style="color: #28a745; background-color: #e6f9ec;">Active</span>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center py-4">No active investments</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Deposits -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="card-title mb-0">Recent Deposits</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Amount</th>
+                                    <th>Payment Method</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for deposit in deposits %}
+                                <tr>
+                                    <td>R{{ deposit.amount }}</td>
+                                    <td>{{ deposit.get_payment_method_display }}</td>
+                                    <td>
+                                        {% if deposit.status == 'approved' %}
+                                            <span class="badge badge-{{ deposit.status|lower }}" style="color: #000000 !important; background-color: #90EE90;">{{ deposit.get_status_display }}</span>
+                                        {% elif deposit.status == 'rejected' %}
+                                            <span class="badge badge-{{ deposit.status|lower }}" style="color: #000000 !important; background-color: #FFB6C1;">{{ deposit.get_status_display }}</span>
+                                        {% else %}
+                                            <span class="badge badge-{{ deposit.status|lower }}" style="color: #000000 !important; background-color: #e6f9ec;">{{ deposit.get_status_display }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ deposit.created_at|date:"M d, Y" }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center py-4">No recent deposits</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="card-title mb-0">Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6 col-md-3 mb-3">
+                            <a href="{% url 'deposit' %}" class="btn btn-primary btn-block">Make Deposit</a>
+                        </div>
+                        <div class="col-6 col-md-3 mb-3">
+                            <a href="{% url 'tiers' %}" class="btn btn-success btn-block">Invest Now</a>
+                        </div>
+                        <div class="col-6 col-md-3 mb-3">
+                            <a href="{% url 'referral' %}" class="btn btn-info btn-block">Refer Friends</a>
+                        </div>
+                        <div class="col-6 col-md-3 mb-3">
+                            <a href="{% url 'profile' %}" class="btn btn-secondary btn-block">View Profile</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
