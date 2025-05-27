@@ -426,41 +426,18 @@ def withdrawal_view(request):
 # Shows real-time activity and AI investment updates
 @login_required
 def feed_view(request):
-    # Get latest investment payouts from the last 24 hours
-    latest_payouts = Investment.objects.filter(
-        is_active=False,
-        end_date__gte=timezone.now() - timedelta(days=1)
-    ).select_related('tier', 'user').order_by('-end_date')[:5]
-    
-    # Get recent deposits from the last 24 hours
-    recent_deposits = Deposit.objects.filter(
-        status='approved',
-        created_at__gte=timezone.now() - timedelta(days=1)
-    ).select_related('user').order_by('-created_at')[:10]
-    
-    # Get recent referral rewards from the last 24 hours
-    recent_referrals = ReferralReward.objects.filter(
-        awarded_at__gte=timezone.now() - timedelta(days=1)
-    ).select_related(
-        'referrer', 'referred'
-    ).order_by('-awarded_at')[:5]
-    
-    # Dummy usernames for simulated activity
+    # --- 1. DUMMY DATA SETUP ---
     dummy_names = [
         'BitcoinPro', 'DigitalTrader', 'CryptoNinja', 'BlockchainKing',
         'EthereumMaster', 'TradingGuru', 'TradingTitan', 'CryptoQueen',
         'BitcoinWizard', 'BlockchainBoss', 'SmartInvestor', 'CryptoElite'
     ]
-    
-    # Dummy tier names and durations
     dummy_tiers = [
         {'name': 'Silver Elite', 'duration': 14},
         {'name': 'Gold Premium', 'duration': 21},
         {'name': 'Diamond VIP', 'duration': 45}
     ]
-    
-    # Process AI investment updates with dummy data
-    investment_updates = [
+    dummy_investment_updates = [
         {
             'tier_name': 'Diamond VIP',
             'username': 'CryptoQueen',
@@ -502,20 +479,29 @@ def feed_view(request):
             'timestamp': timezone.now() - timedelta(minutes=60)
         }
     ]
-    
-    # Get user milestones (deposits, upgrades, payouts)
+    # --- 2. FETCH REAL DATA ---
+    latest_payouts = Investment.objects.filter(
+        is_active=False,
+        end_date__gte=timezone.now() - timedelta(days=1)
+    ).select_related('tier', 'user').order_by('-end_date')[:5]
+    recent_deposits = Deposit.objects.filter(
+        status='approved',
+        created_at__gte=timezone.now() - timedelta(days=1)
+    ).select_related('user').order_by('-created_at')[:10]
+    recent_referrals = ReferralReward.objects.filter(
+        awarded_at__gte=timezone.now() - timedelta(days=1)
+    ).select_related('referrer', 'referred').order_by('-awarded_at')[:5]
+    # --- 3. BUILD USER MILESTONES (REAL + DUMMY) ---
     user_milestones = []
-    
-    # Add real deposits with dummy usernames
+    # Add real deposits
     for deposit in recent_deposits:
         user_milestones.append({
             'type': 'deposit',
-            'user': {'username': random.choice(dummy_names)},
+            'user': {'username': deposit.user.username},
             'amount': deposit.amount,
             'timestamp': deposit.created_at
         })
-    
-    # Add simulated deposits if we have less than 10 total activities
+    # Add simulated deposits if less than 10
     while len(user_milestones) < 10:
         user_milestones.append({
             'type': 'deposit',
@@ -523,23 +509,19 @@ def feed_view(request):
             'amount': random.randint(1000, 5000),
             'timestamp': timezone.now() - timedelta(minutes=random.randint(1, 60))
         })
-    
-    # Add upgrades (when users reach new levels) from the last 24 hours
+    # Add real upgrades
     level_upgrades = CustomUser.objects.filter(
         level__gt=1,
         date_joined__gte=timezone.now() - timedelta(days=1)
     ).order_by('-date_joined')[:3]
-    
-    # Add real upgrades with dummy usernames
     for user in level_upgrades:
         user_milestones.append({
             'type': 'upgrade',
-            'user': {'username': random.choice(dummy_names)},
+            'user': {'username': user.username},
             'level': user.level,
             'timestamp': user.date_joined
         })
-    
-    # Add simulated upgrades if we have less than 13 total activities
+    # Add simulated upgrades if less than 13
     while len(user_milestones) < 13:
         user_milestones.append({
             'type': 'upgrade',
@@ -547,17 +529,15 @@ def feed_view(request):
             'level': random.randint(2, 3),
             'timestamp': timezone.now() - timedelta(minutes=random.randint(1, 60))
         })
-    
-    # Add real payouts with dummy usernames
+    # Add real payouts
     for payout in latest_payouts:
         user_milestones.append({
             'type': 'payout',
-            'user': {'username': random.choice(dummy_names)},
+            'user': {'username': payout.user.username},
             'amount': payout.return_amount - payout.amount,
             'timestamp': payout.end_date
         })
-    
-    # Add simulated payouts if we have less than 15 total activities
+    # Add simulated payouts if less than 15
     while len(user_milestones) < 15:
         user_milestones.append({
             'type': 'payout',
@@ -565,24 +545,39 @@ def feed_view(request):
             'amount': random.randint(1000, 5000),
             'timestamp': timezone.now() - timedelta(minutes=random.randint(1, 60))
         })
-    
-    # Sort milestones by timestamp
+    # Sort and limit
     user_milestones.sort(key=lambda x: x['timestamp'], reverse=True)
-    user_milestones = user_milestones[:15]  # Keep the 15 most recent activities
-    
-    # Process referral activities with dummy usernames
+    user_milestones = user_milestones[:15]
+    # --- 4. BUILD INVESTMENT UPDATES (REAL + DUMMY) ---
+    investment_updates = []
+    # Add real payouts as investment updates
+    for payout in latest_payouts:
+        investment_updates.append({
+            'tier_name': payout.tier.name if payout.tier else 'Unknown',
+            'username': payout.user.username,
+            'return_amount': payout.return_amount,
+            'amount': payout.amount,
+            'duration': payout.tier.duration_days if payout.tier else 0,
+            'timestamp': payout.end_date
+        })
+    # Add dummy investment updates if less than 5
+    i = 0
+    while len(investment_updates) < 5 and i < len(dummy_investment_updates):
+        investment_updates.append(dummy_investment_updates[i])
+        i += 1
+    # Sort and limit
+    investment_updates.sort(key=lambda x: x['timestamp'], reverse=True)
+    investment_updates = investment_updates[:5]
+    # --- 5. BUILD REFERRAL ACTIVITIES (REAL + DUMMY) ---
     referral_activities = []
-    
-    # Add real referral activities with dummy usernames
     for reward in recent_referrals:
         referral_activities.append({
-            'referrer': random.choice(dummy_names),
-            'referred': random.choice(dummy_names),
+            'referrer': reward.referrer.username,
+            'referred': reward.referred.username,
             'amount': reward.reward_amount,
             'timestamp': reward.awarded_at
         })
-    
-    # Add simulated referral activities if we have less than 5
+    # Add dummy referral activities if less than 5
     while len(referral_activities) < 5:
         referral_activities.append({
             'referrer': random.choice(dummy_names),
@@ -590,12 +585,9 @@ def feed_view(request):
             'amount': random.randint(35, 88),
             'timestamp': timezone.now() - timedelta(minutes=random.randint(1, 60))
         })
-    
-    # Sort referral activities by timestamp
     referral_activities.sort(key=lambda x: x['timestamp'], reverse=True)
-    referral_activities = referral_activities[:5]  # Keep the 5 most recent activities
-    
-    # Dynamic tips based on recent activity
+    referral_activities = referral_activities[:5]
+    # --- 6. TIPS & SECURITY REMINDERS ---
     tips = [
         "💡 Tip: Reinvest to reach higher tiers faster.",
         "💡 Tip: Refer friends to earn passive income.",
@@ -603,8 +595,6 @@ def feed_view(request):
         "💡 Tip: Stay consistent with your investments.",
         "💡 Tip: Monitor market trends for better timing."
     ]
-    
-    # Security reminders
     security_reminders = [
         "⚠️ We never ask for your private keys. Stay safe.",
         "⚠️ Enable 2FA for extra security.",
@@ -612,7 +602,7 @@ def feed_view(request):
         "⚠️ Verify all transactions carefully.",
         "⚠️ Report suspicious activity immediately."
     ]
-    
+    # --- 7. CONTEXT ---
     context = {
         'investment_updates': investment_updates,
         'user_milestones': user_milestones,
@@ -620,7 +610,6 @@ def feed_view(request):
         'tips': tips,
         'security_reminders': security_reminders,
     }
-    
     return render(request, 'core/feed.html', context)
 
 @login_required
