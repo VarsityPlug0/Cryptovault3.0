@@ -1,0 +1,640 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Crypto Feed - AI Crypto Vault{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <!-- Main Feed Column -->
+        <div class="col-lg-8">
+            <!-- AI Trading Bot Performance -->
+            <div class="card shadow-sm mb-4 bg-dark text-light">
+                <div class="card-header bg-dark border-secondary">
+                    <h5 class="card-title mb-0">🤖 AI Trading Bot Performance</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Performance Stats -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="text-center p-3 border border-secondary rounded">
+                                <h3 class="text-success mb-0">+24.5%</h3>
+                                <small class="text-light">30-Day Return</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center p-3 border border-secondary rounded">
+                                <h3 class="text-success mb-0">98.7%</h3>
+                                <small class="text-light">Win Rate</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center p-3 border border-secondary rounded">
+                                <h3 class="text-success mb-0">R2.4M</h3>
+                                <small class="text-light">Total Profits</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center p-3 border border-secondary rounded">
+                                <h3 class="text-success mb-0" id="today-payouts">R0</h3>
+                                <small class="text-light">Today's Payouts</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Trades -->
+                    <h6 class="mb-3">Recent Successful Trades</h6>
+                    <div class="list-group list-group-flush mb-4">
+                        <div class="list-group-item bg-dark text-light border-secondary">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">BTC/USDT</h6>
+                                    <p class="mb-0 text-success">+3.2% in 2 hours</p>
+                                </div>
+                                <small class="text-light">2 hours ago</small>
+                            </div>
+                        </div>
+                        <div class="list-group-item bg-dark text-light border-secondary">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">ETH/USDT</h6>
+                                    <p class="mb-0 text-success">+2.8% in 3 hours</p>
+                                </div>
+                                <small class="text-light">5 hours ago</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Investment Opportunities -->
+                    <div class="alert alert-success bg-dark border-success">
+                        <h6 class="alert-heading">🎯 Current Opportunities</h6>
+                        <p class="mb-0">Our AI has identified strong momentum in the market. Upgrade your investment tier now to maximize returns!</p>
+                        <hr class="border-success">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-light">Limited time offer: 5% bonus on new investments</small>
+                            <a href="{% url 'tiers' %}" class="btn btn-success btn-sm">Upgrade Now</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- User Milestones -->
+            <div class="card shadow-sm mb-4 bg-dark text-light">
+                <div class="card-header bg-dark border-secondary d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">🌟 Recent Activity</h5>
+                    <small class="text-light" id="last-updated">Last updated: Just now</small>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        {% for milestone in user_milestones %}
+                        <div class="list-group-item bg-dark text-light border-secondary">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    {% if milestone.type == 'deposit' %}
+                                        <p class="mb-0">
+                                            <span class="text-primary">{{ milestone.user.username }}</span> 
+                                            just deposited R{{ milestone.amount }}
+                                        </p>
+                                    {% elif milestone.type == 'upgrade' %}
+                                        <p class="mb-0">
+                                            <span class="text-success">{{ milestone.user.username }}</span> 
+                                            unlocked Tier {{ milestone.level }}!
+                                        </p>
+                                    {% elif milestone.type == 'payout' %}
+                                        <p class="mb-0">
+                                            <span class="text-warning">{{ milestone.user.username }}</span> 
+                                            earned R{{ milestone.amount }} today!
+                                        </p>
+                                    {% endif %}
+                                </div>
+                                <small class="text-light">{{ milestone.timestamp|timesince }} ago</small>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="text-center py-4">
+                            <p class="text-light mb-0">No recent activity</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Investment Updates -->
+            <div class="card shadow-sm mb-4 bg-dark text-light">
+                <div class="card-header bg-dark border-secondary">
+                    <h5 class="card-title mb-0">🧠 AI Investment Updates</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        {% for update in investment_updates %}
+                        <div class="list-group-item bg-dark text-light border-secondary">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">{{ update.tier_name }}</h6>
+                                    <p class="mb-0 text-light">
+                                        <span class="text-success">{{ update.username }}</span> earned R{{ update.return_amount }} on R{{ update.amount }} in {{ update.duration }} days
+                                    </p>
+                                </div>
+                                <small class="text-light">{{ update.timestamp|timesince }} ago</small>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="text-center py-4">
+                            <p class="text-light mb-0">No recent payouts</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tips & Insights -->
+            <div class="card shadow-sm mb-4 bg-dark text-light">
+                <div class="card-header bg-dark border-secondary">
+                    <h5 class="card-title mb-0">💡 Tips & Insights</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        {% for tip in tips %}
+                        <div class="list-group-item bg-dark text-light border-secondary">
+                            <p class="mb-0">{{ tip }}</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Security Reminders -->
+            <div class="card shadow-sm bg-dark text-light">
+                <div class="card-header bg-dark border-secondary">
+                    <h5 class="card-title mb-0">🔒 Security Reminders</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        {% for reminder in security_reminders %}
+                        <div class="list-group-item bg-dark text-light border-secondary">
+                            <p class="mb-0">{{ reminder }}</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar Column -->
+        <div class="col-lg-4">
+            <!-- Market Analysis -->
+            <div class="card shadow-sm mb-4 bg-dark text-light">
+                <div class="card-header bg-dark border-secondary">
+                    <h5 class="card-title mb-0">📊 AI Market Analysis</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        <div class="list-group-item bg-dark text-light border-secondary">
+                            <h6 class="mb-2">Market Sentiment</h6>
+                            <div class="progress mb-2" style="height: 10px;">
+                                <div class="progress-bar bg-success" role="progressbar" style="width: 75%"></div>
+                            </div>
+                            <small class="text-light">Strong bullish signals detected</small>
+                        </div>
+                        <div class="list-group-item bg-dark text-light border-secondary">
+                            <h6 class="mb-2">Risk Level</h6>
+                            <div class="progress mb-2" style="height: 10px;">
+                                <div class="progress-bar bg-warning" role="progressbar" style="width: 30%"></div>
+                            </div>
+                            <small class="text-light">Low risk trading conditions</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Crypto Market Trends -->
+            <div class="card shadow-sm mb-4 bg-dark text-light">
+                <div class="card-header bg-dark border-secondary">
+                    <h5 class="card-title mb-0">📈 Market Trends</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        <div class="list-group-item bg-dark text-light border-secondary">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">Bitcoin (BTC)</h6>
+                                    <p class="mb-0 text-success">R1,234,567 (+2.5%)</p>
+                                </div>
+                                <i class="bi bi-currency-bitcoin text-warning"></i>
+                            </div>
+                        </div>
+                        <div class="list-group-item bg-dark text-light border-secondary">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">Ethereum (ETH)</h6>
+                                    <p class="mb-0 text-success">R89,123 (+1.8%)</p>
+                                </div>
+                                <i class="bi bi-currency-ethereum text-info"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Referral Activity -->
+            <div class="card shadow-sm mb-4 bg-dark text-light">
+                <div class="card-header bg-dark border-secondary">
+                    <h5 class="card-title mb-0">🎉 Referral Activity</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        {% for activity in referral_activities %}
+                        <div class="list-group-item bg-dark text-light border-secondary">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <p class="mb-0">
+                                        <span class="text-primary">{{ activity.referrer }}</span> referred 
+                                        <span class="text-success">{{ activity.referred }}</span> and earned R{{ activity.amount }}
+                                    </p>
+                                </div>
+                                <small class="text-light">{{ activity.timestamp|timesince }} ago</small>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="text-center py-4">
+                            <p class="text-light mb-0">No recent referrals</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Activity Feed Section -->
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm bg-dark text-light">
+                <div class="card-header bg-dark border-secondary">
+                    <h5 class="card-title mb-0">📊 Activity Feed</h5>
+                </div>
+                <div class="card-body">
+                    <div class="activity-feed">
+                        <!-- Investment Updates -->
+                        <div class="activity-section mb-4">
+                            <h6 class="text-primary mb-3">
+                                <i class="bi bi-graph-up"></i> AI Investment Updates
+                            </h6>
+                            <div id="investment-updates" class="activity-content">
+                            </div>
+                        </div>
+
+                        <!-- User Milestones -->
+                        <div class="activity-section mb-4">
+                            <h6 class="text-success mb-3">
+                                <i class="bi bi-trophy"></i> User Milestones
+                            </h6>
+                            <div id="user-milestones" class="activity-content">
+                            </div>
+                        </div>
+
+                        <!-- Referral Activity -->
+                        <div class="activity-section">
+                            <h6 class="text-info mb-3">
+                                <i class="bi bi-people"></i> Referral Activity
+                            </h6>
+                            <div id="referral-activity" class="activity-content">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Function to update the last updated timestamp
+    function updateLastUpdated() {
+        const now = new Date();
+        const options = { 
+            hour: '2-digit', 
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: true 
+        };
+        document.getElementById('last-updated').textContent = 
+            'Last updated: ' + now.toLocaleTimeString('en-US', options);
+    }
+
+    // Update timestamp every second
+    setInterval(updateLastUpdated, 1000);
+    updateLastUpdated();
+
+    // Auto-refresh the page every 5 minutes
+    setTimeout(function() {
+        window.location.reload();
+    }, 300000); // 5 minutes = 300000 milliseconds
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Sample data for demonstration
+    const investmentUpdates = [
+        "New investment opportunity in Platinum Plus tier!",
+        "Market analysis shows strong potential for growth",
+        "AI trading bot achieved 98.7% success rate today",
+        "Special bonus available for early investors",
+        "New investment strategy implemented successfully"
+    ];
+
+    const userMilestones = [
+        "Reached Level 2 investor status!",
+        "Completed 5 successful investments",
+        "Achieved R10,000 total investment milestone",
+        "Earned R1,000 in referral bonuses",
+        "Maintained 30-day active streak"
+    ];
+
+    const referralActivity = [
+        "John joined through your referral link",
+        "Sarah completed her first investment",
+        "Mike reached Level 2 through your referral",
+        "Emma earned her first referral bonus",
+        "David's portfolio grew by 25%"
+    ];
+
+    // Function to create a new activity item with animation
+    function createActivityItem(text, type) {
+        const item = document.createElement('div');
+        item.className = 'activity-item p-3 mb-2 rounded';
+        
+        // Add different background colors based on type
+        switch(type) {
+            case 'investment':
+                item.classList.add('bg-dark-primary');
+                break;
+            case 'milestone':
+                item.classList.add('bg-dark-success');
+                break;
+            case 'referral':
+                item.classList.add('bg-dark-info');
+                break;
+        }
+        
+        item.innerHTML = `
+            <div class="d-flex align-items-center">
+                <div class="activity-icon me-3">
+                    <i class="bi ${type === 'investment' ? 'bi-graph-up' : 
+                                 type === 'milestone' ? 'bi-trophy' : 
+                                 'bi-people'}"></i>
+                </div>
+                <div class="activity-text">
+                    <div class="text-content">${text}</div>
+                </div>
+            </div>
+        `;
+        
+        return item;
+    }
+
+    // Function to update activity sections with random items
+    function updateActivitySections() {
+        const investmentContainer = document.getElementById('investment-updates');
+        const milestoneContainer = document.getElementById('user-milestones');
+        const referralContainer = document.getElementById('referral-activity');
+        
+        if (!investmentContainer || !milestoneContainer || !referralContainer) {
+            console.error('Activity containers not found');
+            return;
+        }
+        
+        // Add random items with fade-in animation
+        const randomInvestment = investmentUpdates[Math.floor(Math.random() * investmentUpdates.length)];
+        const randomMilestone = userMilestones[Math.floor(Math.random() * userMilestones.length)];
+        const randomReferral = referralActivity[Math.floor(Math.random() * referralActivity.length)];
+        
+        // Update text content with animation
+        setTimeout(() => {
+            const textContent = investmentContainer.querySelector('.text-content');
+            if (textContent) {
+                textContent.style.opacity = '0';
+                setTimeout(() => {
+                    textContent.textContent = randomInvestment;
+                    textContent.style.opacity = '1';
+                }, 150);
+            }
+        }, 100);
+        
+        setTimeout(() => {
+            const textContent = milestoneContainer.querySelector('.text-content');
+            if (textContent) {
+                textContent.style.opacity = '0';
+                setTimeout(() => {
+                    textContent.textContent = randomMilestone;
+                    textContent.style.opacity = '1';
+                }, 150);
+            }
+        }, 300);
+        
+        setTimeout(() => {
+            const textContent = referralContainer.querySelector('.text-content');
+            if (textContent) {
+                textContent.style.opacity = '0';
+                setTimeout(() => {
+                    textContent.textContent = randomReferral;
+                    textContent.style.opacity = '1';
+                }, 150);
+            }
+        }, 500);
+    }
+
+    // Create initial items
+    const investmentContainer = document.getElementById('investment-updates');
+    const milestoneContainer = document.getElementById('user-milestones');
+    const referralContainer = document.getElementById('referral-activity');
+    
+    if (investmentContainer && milestoneContainer && referralContainer) {
+        investmentContainer.appendChild(createActivityItem(investmentUpdates[0], 'investment'));
+        milestoneContainer.appendChild(createActivityItem(userMilestones[0], 'milestone'));
+        referralContainer.appendChild(createActivityItem(referralActivity[0], 'referral'));
+    }
+
+    // Update sections every 5 seconds
+    setInterval(updateActivitySections, 5000);
+
+    // Function to format currency
+    function formatCurrency(amount) {
+        return 'R' + amount.toLocaleString('en-ZA', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+    }
+
+    // Function to update today's payouts
+    function updateTodayPayouts() {
+        const payoutElement = document.getElementById('today-payouts');
+        if (!payoutElement) return;
+
+        // Get current time
+        const now = new Date();
+        const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const hoursSinceStart = Math.floor((now - startOfDay) / (1000 * 60 * 60));
+        
+        // Start at R40,000 and increment by R5,000 every hour
+        const baseAmount = 40000;
+        const hourlyIncrement = 5000;
+        const currentPayout = baseAmount + (hoursSinceStart * hourlyIncrement);
+        
+        // Animate the number change
+        const currentValue = parseFloat(payoutElement.textContent.replace('R', '').replace(/,/g, ''));
+        const targetValue = currentPayout;
+        
+        // Animate the number
+        let startTime = null;
+        const duration = 1000; // 1 second animation
+        
+        function animate(currentTime) {
+            if (!startTime) startTime = currentTime;
+            const progress = Math.min((currentTime - startTime) / duration, 1);
+            
+            const currentAmount = currentValue + (targetValue - currentValue) * progress;
+            payoutElement.textContent = formatCurrency(currentAmount);
+            
+            if (progress < 1) {
+                requestAnimationFrame(animate);
+            }
+        }
+        
+        requestAnimationFrame(animate);
+    }
+
+    // Update payouts every minute to check for hour changes
+    setInterval(updateTodayPayouts, 60000);
+    
+    // Initial update
+    updateTodayPayouts();
+});
+</script>
+
+<style>
+.activity-feed {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.activity-item {
+    border: 1px solid rgba(255,255,255,0.1);
+    background-color: rgba(255,255,255,0.05);
+    margin-bottom: 10px;
+}
+
+.activity-item:hover {
+    background-color: rgba(255,255,255,0.1);
+}
+
+.bg-dark-primary {
+    background-color: rgba(13, 110, 253, 0.2);
+}
+
+.bg-dark-success {
+    background-color: rgba(25, 135, 84, 0.2);
+}
+
+.bg-dark-info {
+    background-color: rgba(13, 202, 240, 0.2);
+}
+
+.activity-icon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background-color: rgba(255,255,255,0.1);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.activity-icon i {
+    font-size: 1.2rem;
+    color: var(--accent-color);
+}
+
+.activity-text {
+    flex: 1;
+    font-size: 0.9rem;
+    color: var(--text-color);
+    position: relative;
+    min-height: 1.5em;
+}
+
+.text-content {
+    transition: opacity 0.3s ease-in-out;
+}
+
+/* Custom scrollbar */
+.activity-feed::-webkit-scrollbar {
+    width: 6px;
+}
+
+.activity-feed::-webkit-scrollbar-track {
+    background: rgba(255,255,255,0.1);
+}
+
+.activity-feed::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.2);
+    border-radius: 3px;
+}
+
+.activity-feed::-webkit-scrollbar-thumb:hover {
+    background: rgba(255,255,255,0.3);
+}
+
+/* Ensure text is visible */
+.text-primary, .text-success, .text-info {
+    color: var(--accent-color) !important;
+}
+
+.activity-section h6 {
+    color: var(--accent-color) !important;
+    font-weight: 600;
+}
+
+.spinner-border {
+    color: var(--accent-color) !important;
+}
+
+.text-primary {
+    color: #0d6efd !important;
+}
+
+.text-success {
+    color: #198754 !important;
+}
+
+.text-warning {
+    color: #ffc107 !important;
+}
+
+.list-group-item {
+    transition: all 0.3s ease;
+}
+
+.list-group-item:hover {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+.progress {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.progress-bar {
+    transition: width 0.6s ease;
+}
+
+#last-updated {
+    font-size: 0.8rem;
+    opacity: 0.8;
+}
+</style>
+{% endblock %} 

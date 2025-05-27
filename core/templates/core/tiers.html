@@ -1,0 +1,323 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+    <!-- User Level Information -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-dark text-light">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="card-title mb-0">Current Level: {{ user_level }}</h5>
+                            <p class="text-light mb-0">Total Invested: R{{ total_invested }}</p>
+                            <p class="text-light mb-0">Wallet Balance: R{{ wallet_balance }}</p>
+                        </div>
+                        <a href="{% url 'deposit' %}" class="btn btn-primary">
+                            <i class="bi bi-wallet2"></i> Top Up
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Level 1 Tiers -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-dark text-light">
+                <div class="card-body">
+                    <h5 class="card-title">Level 1 Tiers (Short-term)</h5>
+                    <div class="row">
+                        {% for tier in tiers %}
+                            {% if tier.min_level == 1 %}
+                            <div class="col-md-4 mb-3">
+                                <div class="card {% if not tier.eligible %}border-warning{% elif tier.invested %}border-secondary{% elif tier.is_daily_special %}border-danger{% else %}border-success{% endif %} bg-dark text-light">
+                                    <div class="card-body text-center">
+                                        {% if tier.logo %}
+                                            <img src="{{ tier.logo.url }}" alt="{{ tier.name }} Logo" class="img-fluid mb-3" style="max-height: 100px;">
+                                        {% else %}
+                                            <div class="mb-3">
+                                                <i class="bi bi-currency-bitcoin text-warning" style="font-size: 3rem;"></i>
+                                            </div>
+                                        {% endif %}
+                                        <h5 class="card-title">
+                                            {{ tier.name }}
+                                            {% if tier.is_daily_special %}
+                                                <span class="badge badge-danger">DAILY SPECIAL!</span>
+                                            {% endif %}
+                                        </h5>
+                                        <p class="card-text">
+                                            Investment: R{{ tier.amount }}<br>
+                                            Duration: {{ tier.duration_days }} days<br>
+                                            {% if tier.is_daily_special %}
+                                                <span class="text-danger">
+                                                    Special Return: R{{ tier.special_return_amount }}<br>
+                                                    ({{ tier.special_return_multiplier }}x multiplier!)
+                                                </span>
+                                            {% else %}
+                                                Return: R{{ tier.return_amount }}
+                                            {% endif %}
+                                        </p>
+                                        {% if tier.description %}
+                                            <p class="card-text text-light-50">{{ tier.description }}</p>
+                                        {% endif %}
+                                        {% if tier.invested %}
+                                            {% if tier.can_cash_out %}
+                                                <a href="{% url 'cash_out' tier.investment.id %}" class="btn btn-success w-100">Cash Out R{{ tier.investment.return_amount }}</a>
+                                            {% else %}
+                                                <button class="btn btn-secondary w-100 waiting-time" disabled data-end-time="{{ investment.end_date|date:'c' }}" data-investment-id="{{ investment.id }}">
+                                                    {% if tier.waiting_time_days > 0 %}
+                                                        Waiting: {{ tier.waiting_time_days }} days
+                                                    {% else %}
+                                                        Waiting: {{ tier.waiting_time_hours }}h {{ tier.waiting_time_minutes }}m {{ tier.waiting_time_seconds }}s
+                                                    {% endif %}
+                                                </button>
+                                            {% endif %}
+                                        {% elif not tier.eligible %}
+                                            <button class="btn btn-warning w-100" disabled data-toggle="tooltip" 
+                                                    title="Reach Level 1 to unlock">
+                                                Locked
+                                            </button>
+                                        {% elif not tier.has_sufficient_balance %}
+                                            <button class="btn btn-info w-100" disabled data-toggle="tooltip" 
+                                                    title="Need R{{ tier.remaining_amount }} more to invest">
+                                                Insufficient Balance
+                                            </button>
+                                        {% else %}
+                                            <a href="{% url 'invest' tier.id %}" class="btn {% if tier.is_daily_special %}btn-danger{% else %}btn-success{% endif %} w-100">
+                                                {% if tier.is_daily_special %}Special Offer!{% else %}Invest Now{% endif %}
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Level 2 Tiers -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-dark text-light">
+                <div class="card-body">
+                    <h5 class="card-title">Level 2 Tiers (Medium-term)</h5>
+                    <div class="row">
+                        {% for tier in tiers %}
+                            {% if tier.min_level == 2 %}
+                            <div class="col-md-4 mb-3">
+                                <div class="card {% if not tier.eligible %}border-warning{% elif tier.invested %}border-secondary{% elif tier.is_daily_special %}border-danger{% else %}border-success{% endif %} bg-dark text-light">
+                                    <div class="card-body text-center">
+                                        {% if tier.logo %}
+                                            <img src="{{ tier.logo.url }}" alt="{{ tier.name }} Logo" class="img-fluid mb-3" style="max-height: 100px;">
+                                        {% else %}
+                                            <div class="mb-3">
+                                                <i class="bi bi-currency-bitcoin text-warning" style="font-size: 3rem;"></i>
+                                            </div>
+                                        {% endif %}
+                                        <h5 class="card-title">
+                                            {{ tier.name }}
+                                            {% if tier.is_daily_special %}
+                                                <span class="badge badge-danger">DAILY SPECIAL!</span>
+                                            {% endif %}
+                                        </h5>
+                                        <p class="card-text">
+                                            Investment: R{{ tier.amount }}<br>
+                                            Duration: {{ tier.duration_days }} days<br>
+                                            {% if tier.is_daily_special %}
+                                                <span class="text-danger">
+                                                    Special Return: R{{ tier.special_return_amount }}<br>
+                                                    ({{ tier.special_return_multiplier }}x multiplier!)
+                                                </span>
+                                            {% else %}
+                                                Return: R{{ tier.return_amount }}
+                                            {% endif %}
+                                        </p>
+                                        {% if tier.description %}
+                                            <p class="card-text text-light-50">{{ tier.description }}</p>
+                                        {% endif %}
+                                        {% if tier.invested %}
+                                            {% if tier.can_cash_out %}
+                                                <a href="{% url 'cash_out' tier.investment.id %}" class="btn btn-success w-100">Cash Out R{{ tier.investment.return_amount }}</a>
+                                            {% else %}
+                                                <button class="btn btn-secondary w-100" disabled>
+                                                    {% if tier.waiting_time_days > 0 %}
+                                                        Waiting: {{ tier.waiting_time_days }} days
+                                                    {% else %}
+                                                        Waiting: {{ tier.waiting_time_hours }}h {{ tier.waiting_time_minutes }}m {{ tier.waiting_time_seconds }}s
+                                                    {% endif %}
+                                                </button>
+                                            {% endif %}
+                                        {% elif not tier.eligible %}
+                                            <button class="btn btn-warning w-100" disabled data-toggle="tooltip" 
+                                                    title="Reach Level 2 (R10,000 total investment) to unlock">
+                                                Locked
+                                            </button>
+                                        {% elif not tier.has_sufficient_balance %}
+                                            <button class="btn btn-info w-100" disabled data-toggle="tooltip" 
+                                                    title="Need R{{ tier.remaining_amount }} more to invest">
+                                                Insufficient Balance
+                                            </button>
+                                        {% else %}
+                                            <a href="{% url 'invest' tier.id %}" class="btn {% if tier.is_daily_special %}btn-danger{% else %}btn-success{% endif %} w-100">
+                                                {% if tier.is_daily_special %}Special Offer!{% else %}Invest Now{% endif %}
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Level 3 Tiers -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-dark text-light">
+                <div class="card-body">
+                    <h5 class="card-title">Level 3 Tiers (Long-term)</h5>
+                    <div class="row">
+                        {% for tier in tiers %}
+                            {% if tier.min_level == 3 %}
+                            <div class="col-md-4 mb-3">
+                                <div class="card {% if not tier.eligible %}border-warning{% elif tier.invested %}border-secondary{% elif tier.is_daily_special %}border-danger{% else %}border-success{% endif %} bg-dark text-light">
+                                    <div class="card-body text-center">
+                                        {% if tier.logo %}
+                                            <img src="{{ tier.logo.url }}" alt="{{ tier.name }} Logo" class="img-fluid mb-3" style="max-height: 100px;">
+                                        {% else %}
+                                            <div class="mb-3">
+                                                <i class="bi bi-currency-bitcoin text-warning" style="font-size: 3rem;"></i>
+                                            </div>
+                                        {% endif %}
+                                        <h5 class="card-title">
+                                            {{ tier.name }}
+                                            {% if tier.is_daily_special %}
+                                                <span class="badge badge-danger">DAILY SPECIAL!</span>
+                                            {% endif %}
+                                        </h5>
+                                        <p class="card-text">
+                                            Investment: R{{ tier.amount }}<br>
+                                            Duration: {{ tier.duration_days }} days<br>
+                                            {% if tier.is_daily_special %}
+                                                <span class="text-danger">
+                                                    Special Return: R{{ tier.special_return_amount }}<br>
+                                                    ({{ tier.special_return_multiplier }}x multiplier!)
+                                                </span>
+                                            {% else %}
+                                                Return: R{{ tier.return_amount }}
+                                            {% endif %}
+                                        </p>
+                                        {% if tier.description %}
+                                            <p class="card-text text-light-50">{{ tier.description }}</p>
+                                        {% endif %}
+                                        {% if tier.invested %}
+                                            {% if tier.can_cash_out %}
+                                                <a href="{% url 'cash_out' tier.investment.id %}" class="btn btn-success w-100">Cash Out R{{ tier.investment.return_amount }}</a>
+                                            {% else %}
+                                                <button class="btn btn-secondary w-100" disabled>
+                                                    {% if tier.waiting_time_days > 0 %}
+                                                        Waiting: {{ tier.waiting_time_days }} days
+                                                    {% else %}
+                                                        Waiting: {{ tier.waiting_time_hours }}h {{ tier.waiting_time_minutes }}m {{ tier.waiting_time_seconds }}s
+                                                    {% endif %}
+                                                </button>
+                                            {% endif %}
+                                        {% elif not tier.eligible %}
+                                            <button class="btn btn-warning w-100" disabled data-toggle="tooltip" 
+                                                    title="Reach Level 3 (R20,000 total investment) to unlock">
+                                                Locked
+                                            </button>
+                                        {% elif not tier.has_sufficient_balance %}
+                                            <button class="btn btn-info w-100" disabled data-toggle="tooltip" 
+                                                    title="Need R{{ tier.remaining_amount }} more to invest">
+                                                Insufficient Balance
+                                            </button>
+                                        {% else %}
+                                            <a href="{% url 'invest' tier.id %}" class="btn {% if tier.is_daily_special %}btn-danger{% else %}btn-success{% endif %} w-100">
+                                                {% if tier.is_daily_special %}Special Offer!{% else %}Invest Now{% endif %}
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+$(function () {
+    $('[data-toggle="tooltip"]').tooltip();
+    
+    // Function to update time displays
+    function updateTimeDisplays() {
+        $('.waiting-time').each(function() {
+            var investmentId = $(this).data('investment-id');
+            var endTime = new Date($(this).data('end-time'));
+            var now = new Date();
+            
+            // Get or set the last update time in localStorage
+            var lastUpdateKey = 'last_update_' + investmentId;
+            var lastUpdate = localStorage.getItem(lastUpdateKey);
+            var timeDiff = 0;
+            
+            if (lastUpdate) {
+                // Calculate time difference since last update
+                timeDiff = now - new Date(lastUpdate);
+            }
+            
+            // Store current time as last update
+            localStorage.setItem(lastUpdateKey, now.toISOString());
+            
+            // Adjust end time by the time difference
+            var adjustedEndTime = new Date(endTime.getTime() - timeDiff);
+            var timeRemaining = adjustedEndTime - now;
+            
+            if (timeRemaining <= 0) {
+                // Instead of reloading, check if we can cash out
+                checkCashOutAvailability(investmentId, $(this));
+                return;
+            }
+            
+            var days = Math.floor(timeRemaining / (1000 * 60 * 60 * 24));
+            var hours = Math.floor((timeRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            var minutes = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
+            
+            if (days > 0) {
+                $(this).text('Waiting: ' + days + ' days');
+            } else {
+                $(this).text('Waiting: ' + hours + 'h ' + minutes + 'm');
+            }
+        });
+    }
+    
+    // Function to check if investment is ready for cash out
+    function checkCashOutAvailability(investmentId, buttonElement) {
+        $.get('/check-cash-out/' + investmentId + '/', function(data) {
+            if (data.can_cash_out) {
+                location.reload();
+            }
+        });
+    }
+    
+    // Update time displays every second
+    setInterval(updateTimeDisplays, 1000);
+    updateTimeDisplays();
+});
+</script>
+{% endblock %}
+{% endblock %} 
