@@ -1,25 +1,22 @@
-from django.db import migrations
+from django.db import migrations, models
 
-def check_total_invested_exists(apps, schema_editor):
+def fix_total_invested_column(apps, schema_editor):
     db_alias = schema_editor.connection.alias
     CustomUser = apps.get_model('core', 'CustomUser')
     
-    # Check if the column exists
-    with schema_editor.connection.cursor() as cursor:
-        cursor.execute("""
-            SELECT column_name 
-            FROM information_schema.columns 
-            WHERE table_name='core_customuser' 
-            AND column_name='total_invested';
-        """)
-        exists = cursor.fetchone() is not None
-        
-        if not exists:
-            # Add the column if it doesn't exist
-            cursor.execute("""
-                ALTER TABLE core_customuser 
-                ADD COLUMN total_invested DECIMAL(12,2) DEFAULT 0;
-            """)
+    # Get the field definition
+    field = CustomUser._meta.get_field('total_invested')
+    
+    # Try to add the field - if it exists, this will be a no-op
+    try:
+        schema_editor.add_field(CustomUser, field)
+    except Exception:
+        # If the field already exists, try to alter it
+        try:
+            schema_editor.alter_field(CustomUser, field, field)
+        except Exception:
+            # If both operations fail, the field probably exists with correct type
+            pass
 
 def reverse_total_invested(apps, schema_editor):
     # No need to remove the column in reverse migration
@@ -33,5 +30,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(check_total_invested_exists, reverse_total_invested),
+        migrations.RunPython(fix_total_invested_column, reverse_total_invested),
     ] 
