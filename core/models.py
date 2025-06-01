@@ -265,3 +265,34 @@ class DailySpecial(models.Model):
 
     class Meta:
         ordering = ['-start_time']
+
+class Backup(models.Model):
+    file_name = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+    size = models.BigIntegerField(help_text="Size in bytes")
+    status = models.CharField(
+        max_length=20,
+        choices=[
+            ('success', 'Success'),
+            ('failed', 'Failed'),
+            ('in_progress', 'In Progress')
+        ],
+        default='in_progress'
+    )
+    notes = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Backup'
+        verbose_name_plural = 'Backups'
+
+    def __str__(self):
+        return f"{self.file_name} ({self.created_at.strftime('%Y-%m-%d %H:%M:%S')})"
+
+    def size_display(self):
+        """Return human-readable file size"""
+        for unit in ['B', 'KB', 'MB', 'GB']:
+            if self.size < 1024:
+                return f"{self.size:.1f} {unit}"
+            self.size /= 1024
+        return f"{self.size:.1f} TB"

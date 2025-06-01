@@ -1,10 +1,12 @@
 from django.contrib import admin
-from .models import CustomUser, InvestmentTier, Investment, Wallet, Referral, IPAddress, ReferralReward, Withdrawal, Deposit
+from .models import CustomUser, InvestmentTier, Investment, Wallet, Referral, IPAddress, ReferralReward, Withdrawal, Deposit, Backup
 from django.contrib.auth.admin import UserAdmin
 from django.utils.html import format_html
 from django.urls import reverse
 from django.contrib.admin import AdminSite
 from django.utils.translation import gettext_lazy as _
+from backup_manager import restore_backup
+from django.contrib import messages
 
 class CustomUserAdmin(UserAdmin):
     list_display = ('username', 'email', 'phone', 'level', 'total_invested', 'wallet_balance', 'is_active', 'date_joined')
@@ -218,3 +220,38 @@ class WithdrawalAdmin(admin.ModelAdmin):
             withdrawal.save()
             self.message_user(request, f'Withdrawal of R{withdrawal.amount} has been rejected.')
         return self.response_change(request, withdrawal)
+
+@admin.register(Backup)
+class BackupAdmin(admin.ModelAdmin):
+    list_display = ('file_name', 'created_at', 'size_display', 'status', 'action_buttons')
+    list_filter = ('status', 'created_at')
+    search_fields = ('file_name', 'notes')
+    readonly_fields = ('file_name', 'created_at', 'size', 'status')
+    actions = ['restore_selected_backups']
+
+    def size_display(self, obj):
+        return obj.size_display()
+    size_display.short_description = 'Size'
+
+    def action_buttons(self, obj):
+        if obj.status == 'success':
+            return format_html(
+                '<a class="button" href="{}">Restore</a>',
+                f'/admin/core/backup/{obj.id}/restore/'
+            )
+        return ''
+    action_buttons.short_description = 'Actions'
+
+    def restore_selected_backups(self, request, queryset):
+        for backup in queryset:
+            if backup.status == 'success':
+                try:
+                    if restore_backup(backup.file_name):
+                        messages.success(request, f'Successfully restored backup: {backup.file_name}')
+                    else:
+                        messages.error(request, f'Failed to restore backup: {backup.file_name}')
+                except Exception as e:
+                    messages.error(request, f'Error restoring backup {backup.file_name}: {str(e)}')
+            else:
+                messages.warning(request, f'Cannot restore backup {backup.file_name}: Status is not success')
+    restore_selected_backups.short_description = "Restore selected backups"

@@ -5,6 +5,7 @@ import subprocess
 from pathlib import Path
 import logging
 from django.conf import settings
+from core.models import Backup
 
 # Configure logging
 logging.basicConfig(
@@ -29,6 +30,12 @@ class BackupManager:
             timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
             backup_path = self.backup_dir / f'backup_{timestamp}'
             backup_path.mkdir(exist_ok=True)
+
+            # Create backup record
+            backup_record = Backup.objects.create(
+                file_name=f'backup_{timestamp}.zip',
+                status='in_progress'
+            )
 
             # Backup database
             if settings.DATABASES['default']['ENGINE'] == 'django.db.backends.sqlite3':
@@ -56,10 +63,20 @@ class BackupManager:
             shutil.make_archive(str(backup_path), 'zip', backup_path)
             shutil.rmtree(backup_path)  # Remove the unzipped backup
 
+            # Update backup record
+            zip_path = Path(f"{backup_path}.zip")
+            backup_record.size = zip_path.stat().st_size
+            backup_record.status = 'success'
+            backup_record.save()
+
             logging.info(f"Backup created successfully: {backup_path}.zip")
             return True
 
         except Exception as e:
+            if 'backup_record' in locals():
+                backup_record.status = 'failed'
+                backup_record.notes = str(e)
+                backup_record.save()
             logging.error(f"Backup failed: {str(e)}")
             return False
 
@@ -72,6 +89,9 @@ class BackupManager:
                 age_days = (current_time - file_time).days
                 
                 if age_days > self.retention_days:
+                    # Delete from database
+                    Backup.objects.filter(file_name=backup_file.name).delete()
+                    # Delete file
                     backup_file.unlink()
                     logging.info(f"Removed old backup: {backup_file}")
 
