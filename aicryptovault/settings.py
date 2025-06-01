@@ -25,17 +25,17 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-development-key-123'  # Temporary development key
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-development-key-123')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = ['*']  # Update this with your actual domain in production
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
 # CSRF Settings
-CSRF_TRUSTED_ORIGINS = ['http://localhost:8000', 'http://127.0.0.1:8000']
-CSRF_COOKIE_SECURE = False  # Set to True in production
-CSRF_COOKIE_HTTPONLY = False  # Set to True in production
+CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', 'http://localhost:8000,http://127.0.0.1:8000').split(',')
+CSRF_COOKIE_SECURE = not DEBUG  # True in production, False in development
+CSRF_COOKIE_HTTPONLY = True  # Always True for security
 CSRF_USE_SESSIONS = True
 
 # Application definition
@@ -94,14 +94,14 @@ DATABASES = {
     }
 }
 
-# Comment out production database configuration temporarily
-# if not DEBUG:
-#     import dj_database_url
-#     DATABASES['default'] = dj_database_url.config(
-#         default=os.getenv('DATABASE_URL'),
-#         conn_max_age=600,
-#         conn_health_checks=True,
-#     )
+# Use PostgreSQL in production
+if not DEBUG:
+    import dj_database_url
+    DATABASES['default'] = dj_database_url.config(
+        default=os.getenv('DATABASE_URL'),
+        conn_max_age=600,
+        conn_health_checks=True,
+    )
 
 
 # Password validation
