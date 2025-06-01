@@ -21,6 +21,11 @@ def check_total_invested_exists(apps, schema_editor):
                 ADD COLUMN total_invested DECIMAL(12,2) DEFAULT 0;
             """)
 
+def reverse_total_invested(apps, schema_editor):
+    # No need to remove the column in reverse migration
+    # as it might be used by other parts of the application
+    pass
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -28,5 +33,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(check_total_invested_exists, reverse_code=migrations.RunPython.noop),
+        migrations.RunPython(check_total_invested_exists, reverse_total_invested),
     ] 
